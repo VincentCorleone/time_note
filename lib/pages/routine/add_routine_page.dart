@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:time_note/data/data_model.dart';
+import 'package:time_note/util/efficiency_formatter.dart';
 
 class AddRoutinePage extends StatefulWidget {
   final int type;
@@ -27,13 +28,12 @@ class _AddRoutinePageState extends State<AddRoutinePage> {
   Picker picker;
 
   final snackBar = new SnackBar(
-      content: new Text('目标名称不能为空'),
-      action: new SnackBarAction(
-        label: '确定',
-        onPressed: (){},
-      ),
+    content: new Text('目标名称不能为空'),
+    action: new SnackBarAction(
+      label: '确定',
+      onPressed: () {},
+    ),
     duration: Duration(seconds: 2),
-
   );
 
   @override
@@ -206,7 +206,7 @@ class _AddRoutinePageState extends State<AddRoutinePage> {
                   child: TextField(
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
-                        _UsNumberTextInputFormatter()
+                        EfficiencyFormatter()
                       ],
                       controller: defaultEfficiencyController,
                       autocorrect: false,
@@ -263,21 +263,16 @@ class _AddRoutinePageState extends State<AddRoutinePage> {
           return Column(
             children: <Widget>[
               Padding(
-                padding:
-                    EdgeInsets.only(left: 14, top: 2, bottom: 2, right: 14),
-                child: Column(
-                  children: <Widget>[
-                    Table(
-                        columnWidths: {
-                          0: FractionColumnWidth(0.4),
-                          1: FractionColumnWidth(0.6)
-                        },
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.middle,
-                        children: tableRows)
-                  ],
-                ),
-              ),
+                  padding:
+                      EdgeInsets.only(left: 14, top: 2, bottom: 2, right: 14),
+                  child: Table(
+                      columnWidths: {
+                        0: FractionColumnWidth(0.4),
+                        1: FractionColumnWidth(0.6)
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      children: tableRows)),
               Center(
                 child: RaisedButton(
                     child: const Text("完成"),
@@ -312,52 +307,5 @@ class _AddRoutinePageState extends State<AddRoutinePage> {
             ],
           );
         }));
-  }
-}
-
-class _UsNumberTextInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    String value = newValue.text;
-    int selectionIndex = newValue.selection.end;
-
-    void revert() {
-      //keep origin value bacause of invalid input
-      value = oldValue.text;
-      selectionIndex = oldValue.selection.end;
-    }
-
-    if (oldValue.text == "1.00" && value == "-") {
-      value = "0.00";
-      return new TextEditingValue(
-        text: value,
-        selection: new TextSelection.collapsed(offset: 4),
-      );
-    }
-    //only allow double input
-    double parsedValue;
-    try {
-      parsedValue = double.parse(value);
-    } catch (e) {
-      revert();
-      return new TextEditingValue(
-        text: value,
-        selection: new TextSelection.collapsed(offset: selectionIndex),
-      );
-    }
-
-    if (parsedValue > 1.0) {
-      value = "1.00";
-    } else if (parsedValue < 0.0) {
-      value = "0.00";
-    } else {
-      value = parsedValue.toStringAsFixed(2);
-    }
-
-    return new TextEditingValue(
-      text: value,
-      selection: new TextSelection.collapsed(offset: selectionIndex),
-    );
   }
 }

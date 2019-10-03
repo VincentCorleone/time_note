@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:time_note/data/data_model.dart';
+import 'package:time_note/util/efficiency_formatter.dart';
 
 class UpdateRoutinePage extends StatefulWidget {
   final int type;
@@ -252,7 +253,7 @@ class _UpdateRoutinePageState extends State<UpdateRoutinePage> {
                   child: TextField(
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
-                        _UsNumberTextInputFormatter()
+                        EfficiencyFormatter()
                       ],
                       controller: defaultEfficiencyController,
                       autocorrect: false,
@@ -309,21 +310,16 @@ class _UpdateRoutinePageState extends State<UpdateRoutinePage> {
           return Column(
             children: <Widget>[
               Padding(
-                padding:
-                    EdgeInsets.only(left: 14, top: 2, bottom: 2, right: 14),
-                child: Column(
-                  children: <Widget>[
-                    Table(
-                        columnWidths: {
-                          0: FractionColumnWidth(0.4),
-                          1: FractionColumnWidth(0.6)
-                        },
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.middle,
-                        children: tableRows)
-                  ],
-                ),
-              ),
+                  padding:
+                      EdgeInsets.only(left: 14, top: 2, bottom: 2, right: 14),
+                  child: Table(
+                      columnWidths: {
+                        0: FractionColumnWidth(0.4),
+                        1: FractionColumnWidth(0.6)
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      children: tableRows)),
               Center(
                 child: RaisedButton(
                     child: const Text("完成"),
@@ -333,11 +329,11 @@ class _UpdateRoutinePageState extends State<UpdateRoutinePage> {
                         return;
                       }
                       bool commit = true;
-                      if(this.widget.isCategory && !this.isCategory){
-                        //todo: alert
-                        commit = await this.showDeleteSubRoutinesAlertDialog(context);
+                      if (this.widget.isCategory && !this.isCategory) {
+                        commit = await this
+                            .showDeleteSubRoutinesAlertDialog(context);
                       }
-                      if(commit){
+                      if (commit) {
                         if (this.isCategory) {
                           Category result = Category(
                               name: this.routineName,
@@ -359,52 +355,5 @@ class _UpdateRoutinePageState extends State<UpdateRoutinePage> {
             ],
           );
         }));
-  }
-}
-
-class _UsNumberTextInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    String value = newValue.text;
-    int selectionIndex = newValue.selection.end;
-
-    void revert() {
-      //keep origin value bacause of invalid input
-      value = oldValue.text;
-      selectionIndex = oldValue.selection.end;
-    }
-
-    if (oldValue.text == "1.00" && value == "-") {
-      value = "0.00";
-      return new TextEditingValue(
-        text: value,
-        selection: new TextSelection.collapsed(offset: 4),
-      );
-    }
-    //only allow double input
-    double parsedValue;
-    try {
-      parsedValue = double.parse(value);
-    } catch (e) {
-      revert();
-      return new TextEditingValue(
-        text: value,
-        selection: new TextSelection.collapsed(offset: selectionIndex),
-      );
-    }
-
-    if (parsedValue > 1.0) {
-      value = "1.00";
-    } else if (parsedValue < 0.0) {
-      value = "0.00";
-    } else {
-      value = parsedValue.toStringAsFixed(2);
-    }
-
-    return new TextEditingValue(
-      text: value,
-      selection: new TextSelection.collapsed(offset: selectionIndex),
-    );
   }
 }

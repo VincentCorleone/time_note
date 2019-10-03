@@ -33,8 +33,9 @@ class _ClockState extends State<Clock>{
 
   @override
   void initState() {
-    this.delay = Duration(milliseconds: 100000);
+    this.delay = Duration(milliseconds: 1000);
     this.timer = Timer.periodic(this.delay, (Timer t) => updateClock());
+    this.updateClock();
     super.initState();
   }
 
